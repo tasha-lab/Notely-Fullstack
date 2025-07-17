@@ -1,0 +1,42 @@
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId String @default(uuid()) @id @map("User-Id")
+  firstname String @map("Firstname")
+  lastname String @map("lastname")
+  username String @map("Username") @unique
+  email String @unique @map("User-email")
+  password String @map("Password")
+  avatar String? @map("Profile-avatar")
+  isDeleted Boolean @default(false) @map("Is-Deleted")
+  dateJoined DateTime @map("Joining-Date") @default(now())
+  lastUpdated DateTime @map("Latest-Update") @default(now())
+
+  note Notes[]
+
+  @@map("User")
+}
+
+model Notes {
+  id String @id @default(uuid()) @map("Notes-ID")
+  title String @map("Title")
+  synopsis String @map("Synopsis")
+  content String @map("Notes")
+  isDeleted Boolean @default(false) @map("Isdeleted")
+  dateCreated DateTime @map("Creation-Date") @default(now())
+  lastUpdate DateTime @map("Latest-Update") @default(now())
+  userId String
+
+  @@map("Notes")
+
+  user User @relation(fields: [userId],references: [userId])
+}

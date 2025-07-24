@@ -58,6 +58,73 @@ export const getAllNotes = async (req: UserRequest, res: Response) => {
     return;
   }
 };
+export const getIndividualUsersNotes = async (
+  req: UserRequest,
+  res: Response
+) => {
+  try {
+    const createrId = req.userId;
+    if (!createrId) {
+      res.status(401).json({ message: `Can't get posts.Please login!` });
+      return;
+    }
+    const notes = await client.notes.findMany({
+      where: {
+        userId: createrId,
+        isDeleted: false,
+      },
+      orderBy: { dateCreated: "desc" },
+    });
+    res.status(201).json({
+      message: "All your notes gotten successfully",
+      data: notes,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+    console.log(error);
+    return;
+  }
+};
+export const editNote = async (req: UserRequest, res: Response) => {
+  try {
+    const creatorId = req.userId;
+    if (!creatorId) {
+      res.status(400).json({
+        message: "Can't edit note,please login",
+      });
+      console.log(creatorId);
+      return;
+    }
+    const { title, synopsis, content } = req.body;
+    const { id } = req.params;
+
+    const note = await client.notes.findUnique({
+      where: { id },
+    });
+    if (note?.userId !== creatorId) {
+      res.status(300).json({
+        message: `You cannot edit another author's post`,
+      });
+    }
+
+    const editNote = await client.notes.update({
+      where: { id },
+      data: { title, synopsis, content },
+    });
+    res.status(200).json({
+      message: "Post has been updated successfully",
+      data: editNote,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+    console.log(error);
+    return;
+  }
+};
 export const getASpecificNote = async (req: UserRequest, res: Response) => {
   try {
     const creatorId = req.userId;
@@ -134,7 +201,7 @@ export const deleteNote = async (req: UserRequest, res: Response) => {
     return;
   }
 };
-export const getDeltedAllNotes = async (req: UserRequest, res: Response) => {
+export const getDeletedAllNotes = async (req: UserRequest, res: Response) => {
   try {
     const creatorId = req.userId;
     if (!creatorId) {

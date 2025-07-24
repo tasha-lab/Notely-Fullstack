@@ -10,26 +10,39 @@ export const verify = (
   res: Response,
   next: NextFunction
 ) => {
-  const useHeaders = req.headers.authorization;
+  const authHeader = req.headers.authorization;
 
-  if (!useHeaders || !useHeaders.startsWith("Bearer ")) {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     res.status(401).json({
-      message: "Please login",
+      message: "Access token required. Please login.",
     });
     return;
   }
-  const token = useHeaders.split(" ")[1];
-  const verifyTheToken = (token: string): { userId: string } => {
-    return jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-  };
+
+  const token = authHeader.split(" ")[1];
+
+  if (!token) {
+    res.status(401).json({
+      message: "Access token required. Please login.",
+    });
+    return;
+  }
 
   try {
-    const getDetails = verifyTheToken(token);
-    req.userId = getDetails.userId;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+      userId: string;
+    };
+    req.userId = decoded.userId;
     next();
   } catch (error) {
-    res.status(403).json({ message: "Please login first" });
-    console.log(error);
+    if (error instanceof jwt.TokenExpiredError) {
+      res.status(403).json({ message: "Token expired. Please login again." });
+    } else if (error instanceof jwt.JsonWebTokenError) {
+      res.status(403).json({ message: "Invalid token. Please login again." });
+    } else {
+      res.status(403).json({ message: "Authentication failed. Please login." });
+    }
+    console.error("JWT verification error:", error);
     return;
   }
 };

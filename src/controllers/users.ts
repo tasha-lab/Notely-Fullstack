@@ -99,16 +99,23 @@ export const loginUser = async (req: Request, res: Response) => {
 export const getUserDetails = async (req: UsersRequest, res: Response) => {
   try {
     const id = req.userId;
+    if (!id) {
+      res.status(401).json({
+        message: "Cant edit details,please login",
+      });
+      return;
+    }
     const user = await client.user.findFirst({
       where: { userId: id },
     });
     res.status(200).json({
       message: "Details gotten successfully",
-      data: user,
+      user,
     });
     return;
   } catch (error) {
     res.status(500).json({ message: "Something went wrong" });
+    console.log(error);
     return;
   }
 };
@@ -131,7 +138,7 @@ export const EditPrimaryDetails = async (req: UsersRequest, res: Response) => {
       const response = await imagekit.upload({
         file: fileBuffer,
         fileName: `tasha/${Date.now()}`,
-        folder: "/blogs",
+        folder: "/user",
       });
 
       fs.unlinkSync(imageFile.path);

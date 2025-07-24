@@ -13,7 +13,7 @@ const router = Router();
 
 router.post("/register", createUser);
 router.post("/login", loginUser);
-router.get("/userdetails", getUserDetails);
+router.get("/userdetails", verify, getUserDetails);
 router.patch("/user", upload.single("avatar"), verify, EditPrimaryDetails);
 router.patch("/password", verify, EditPassword);
 

@@ -34,6 +34,8 @@ model Notes {
   isDeleted Boolean @default(false) @map("Isdeleted")
   dateCreated DateTime @map("Creation-Date") @default(now())
   lastUpdate DateTime @map("Latest-Update") @default(now())
+  isPinned Boolean @default(false) @map("pinned")
+  isPrivate Boolean @default(false) @map("private")
   userId String
 
   @@map("Notes")

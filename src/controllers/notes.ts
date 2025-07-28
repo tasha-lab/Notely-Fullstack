@@ -8,7 +8,7 @@ interface UserRequest extends Request {
 export const createANote = async (req: UserRequest, res: Response) => {
   try {
     const creatorId = req.userId;
-    const { title, synopsis, content }: Notes = req.body;
+    const { title, synopsis, content, isPrivate }: Notes = req.body;
 
     if (!creatorId) {
       res.status(400).json({
@@ -17,7 +17,7 @@ export const createANote = async (req: UserRequest, res: Response) => {
       return;
     }
     const note = await client.notes.create({
-      data: { title, synopsis, content, userId: creatorId },
+      data: { title, synopsis, content, userId: creatorId, isPrivate },
     });
     res.status(200).json({
       message: "Note added successfully",
@@ -43,7 +43,10 @@ export const getAllNotes = async (req: UserRequest, res: Response) => {
     }
     const notes = await client.notes.findMany({
       orderBy: { dateCreated: "desc" },
-      where: { isDeleted: false },
+      where: {
+        isDeleted: false,
+        isPrivate: false,
+      },
     });
     res.status(200).json({
       message: "Notes gotten successfully",
@@ -138,7 +141,7 @@ export const getASpecificNote = async (req: UserRequest, res: Response) => {
     }
 
     const note = await client.notes.findFirst({
-      where: { id, isDeleted: false },
+      where: { id },
       include: {
         user: {
           select: {
@@ -246,6 +249,166 @@ export const restoreDeletedNotes = async (req: UserRequest, res: Response) => {
     });
     res.status(200).json({
       message: "Note restored successfully",
+    });
+    return;
+  } catch (error) {
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+    console.log(error);
+    return;
+  }
+};
+export const makeNotePrivate = async (req: UserRequest, res: Response) => {
+  try {
+    const creatorId = req.userId;
+    const { id } = req.params;
+
+    if (!creatorId) {
+      res.status(400).json({
+        message: "Cant make note private, please login",
+      });
+      return;
+    }
+    const note = await client.notes.findUnique({
+      where: { id },
+    });
+    if (note?.userId !== creatorId) {
+      res.status(400).json({
+        message: "Cant set another authors posts to private",
+      });
+      return;
+    }
+    await client.notes.update({
+      where: { id },
+      data: {
+        isPrivate: !note.isPrivate,
+      },
+    });
+    res.status(200).json({
+      message: !note.isPrivate ? "Set to Private" : "Set to Public",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+    console.log(error);
+    return;
+  }
+};
+export const getPrivateNotes = async (req: UserRequest, res: Response) => {
+  try {
+    const creatorId = req.userId;
+    if (!creatorId) {
+      res.status(200).json({
+        message: "Cant get Private notes,please login",
+      });
+      return;
+    }
+    const note = await client.notes.findMany({
+      where: {
+        isPrivate: true,
+        isDeleted: false,
+        userId: creatorId,
+      },
+      orderBy: { dateCreated: "desc" },
+    });
+    res.status(200).json({
+      message: "Private notes retrieved successfully",
+      data: note,
+    });
+    return;
+  } catch (error) {
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+    console.log(error);
+    return;
+  }
+};
+export const PinNotes = async (req: UserRequest, res: Response) => {
+  try {
+    const creatorId = req.userId;
+    const { id } = req.params;
+
+    if (!creatorId) {
+      res.status(400).json({
+        message: "Cant Pin note, please login",
+      });
+      return;
+    }
+    const note = await client.notes.findUnique({
+      where: { id },
+    });
+    if (note?.userId !== creatorId) {
+      res.status(400).json({
+        message: "Cant Pin another authors posts",
+      });
+      return;
+    }
+    await client.notes.update({
+      where: { id },
+      data: {
+        isPinned: !note.isPinned,
+      },
+    });
+    res.status(200).json({
+      message: !note.isPinned ? "Note pinned" : "Note Unpinned",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+    console.log(error);
+    return;
+  }
+};
+export const getPinnedNotes = async (req: UserRequest, res: Response) => {
+  try {
+    const creatorId = req.userId;
+    if (!creatorId) {
+      res.status(200).json({
+        message: "Cant get Pinned notes,please login",
+      });
+      return;
+    }
+    const note = await client.notes.findMany({
+      where: { isPinned: true, isDeleted: false, userId: creatorId },
+      orderBy: { dateCreated: "desc" },
+    });
+    res.status(200).json({
+      message: "Pinned notes retrieved successfully",
+      data: note,
+    });
+    return;
+  } catch (error) {
+    res.status(500).json({
+      message: "Something went wrong",
+    });
+    console.log(error);
+    return;
+  }
+};
+export const getPublicNotes = async (req: UserRequest, res: Response) => {
+  try {
+    const creatorId = req.userId;
+    if (!creatorId) {
+      res.status(200).json({
+        message: "Cant get Public notes,please login",
+      });
+      return;
+    }
+    const note = await client.notes.findMany({
+      where: {
+        isPrivate: false,
+        isDeleted: false,
+        userId: creatorId,
+      },
+      orderBy: { dateCreated: "desc" },
+    });
+    res.status(200).json({
+      message: "Public notes retrieved successfully",
+      data: note,
     });
     return;
   } catch (error) {

@@ -35,14 +35,8 @@ export const verify = (
     req.userId = decoded.userId;
     next();
   } catch (error) {
-    if (error instanceof jwt.TokenExpiredError) {
-      res.status(403).json({ message: "Token expired. Please login again." });
-    } else if (error instanceof jwt.JsonWebTokenError) {
-      res.status(403).json({ message: "Invalid token. Please login again." });
-    } else {
-      res.status(403).json({ message: "Authentication failed. Please login." });
-    }
-    console.error("JWT verification error:", error);
+    res.status(403).json({ message: "Please login first" });
+    console.log(error);
     return;
   }
 };

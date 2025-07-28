@@ -10,6 +10,7 @@ app.use(
   cors({
     origin: ["https://notely-frontend-iota.vercel.app"],
     methods: ["POST", "GET", "PATCH", "PUT", "DELETE"],
+    credentials: true,
   })
 );
 

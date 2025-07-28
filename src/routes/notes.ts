@@ -15,7 +15,7 @@ import {
   restoreDeletedNotes,
 } from "../controllers/notes";
 import { verify } from "../middlewares/verify";
-// import { rewriteNote } from "../controllers/rewriteNote";
+import { rewriteNote } from "../controllers/rewriteNote";
 
 const router = Router();
 
@@ -26,7 +26,7 @@ router.get("/trash", verify, getDeletedAllNotes);
 router.get("/private", verify, getPrivateNotes);
 router.get("/pinned", verify, getPinnedNotes);
 router.get("/public", verify, getPublicNotes);
-// router.post("/rewrite", verify, rewriteNote);
+router.post("/rewrite", verify, rewriteNote);
 router.patch("/pinned/:id", verify, PinNotes);
 router.patch("/private/:id", verify, makeNotePrivate);
 router.get("/:id", verify, getASpecificNote);

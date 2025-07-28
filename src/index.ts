@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: ["https://notely-fullstack.vercel.app"],
+    origin: ["https://notely-frontend-iota.vercel.app"],
     methods: ["POST", "GET", "PATCH", "PUT", "DELETE"],
   })
 );

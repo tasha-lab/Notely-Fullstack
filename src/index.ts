@@ -20,7 +20,7 @@ app.use(
 
 const port = process.env.port || 2345;
 
-app.get("/", async (_req, res) => {
+app.get("/ping", async (_req, res) => {
   res.send("<h1>Welcome to T's API</h1>");
 });
 

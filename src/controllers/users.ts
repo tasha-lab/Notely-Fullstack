@@ -25,6 +25,12 @@ export const createUser = async (req: Request, res: Response) => {
       });
       return;
     }
+    if (password.length < 6) {
+      res.status(400).json({
+        message: "password must be=>6 characters long",
+      });
+      return;
+    }
     const existingUser = await client.user.findFirst({
       where: {
         OR: [{ email }, { username }],

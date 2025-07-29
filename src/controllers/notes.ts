@@ -47,6 +47,15 @@ export const getAllNotes = async (req: UserRequest, res: Response) => {
         isDeleted: false,
         isPrivate: false,
       },
+      include: {
+        user: {
+          select: {
+            avatar: true,
+            firstname: true,
+            lastname: true,
+          },
+        },
+      },
     });
     res.status(200).json({
       message: "Notes gotten successfully",

@@ -11,6 +11,7 @@ app.use(
     origin: [
       "https://notely-frontend-iota.vercel.app",
       "http://localhost:5173",
+      "https://notely-frontend-git-main-tasha-labs-projects.vercel.app/",
     ],
     // origin: ["http://localhost:5173"],
     methods: ["POST", "GET", "PATCH", "PUT", "DELETE"],
